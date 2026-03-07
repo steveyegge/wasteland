@@ -648,3 +648,71 @@ func parseWantedSummaries(csvData string) []WantedSummary {
 	}
 	return results
 }
+
+// ProfileSummary holds aggregate stats for a single rig handle.
+type ProfileSummary struct {
+	Handle    string
+	Posted    int
+	Claimed   int
+	Completed int
+	Stamps    int
+}
+
+// QueryProfiles returns a list of known rig handles with activity counts.
+// It unions handles from the rigs table and from wanted/completions/stamps activity.
+func QueryProfiles(db DB) ([]ProfileSummary, error) {
+	// Aggregate activity stats from wanted, completions, and stamps tables.
+	// Use a union of all known handles to cover rigs that may not be in the rigs table.
+	query := `SELECT handle,
+		COALESCE(SUM(posted),0) AS posted,
+		COALESCE(SUM(claimed),0) AS claimed,
+		COALESCE(SUM(completed),0) AS completed,
+		COALESCE(SUM(stamps),0) AS stamps
+	FROM (
+		SELECT posted_by AS handle, COUNT(*) AS posted, 0 AS claimed, 0 AS completed, 0 AS stamps
+		FROM wanted WHERE posted_by IS NOT NULL AND posted_by != '' AND status != 'withdrawn'
+		GROUP BY posted_by
+		UNION ALL
+		SELECT claimed_by AS handle, 0, COUNT(*), 0, 0
+		FROM wanted WHERE claimed_by IS NOT NULL AND claimed_by != '' AND status != 'withdrawn'
+		GROUP BY claimed_by
+		UNION ALL
+		SELECT completed_by AS handle, 0, 0, COUNT(*), 0
+		FROM completions WHERE completed_by IS NOT NULL AND completed_by != ''
+		GROUP BY completed_by
+		UNION ALL
+		SELECT subject AS handle, 0, 0, 0, COUNT(*)
+		FROM stamps
+		GROUP BY subject
+	) AS t
+	WHERE handle != ''
+	GROUP BY handle
+	ORDER BY (COALESCE(SUM(completed),0) + COALESCE(SUM(stamps),0)) DESC, handle ASC
+	LIMIT 100`
+
+	csvData, err := db.Query(query, "")
+	if err != nil {
+		return nil, fmt.Errorf("querying profiles: %w", err)
+	}
+	return parseProfileSummaries(csvData), nil
+}
+
+func parseProfileSummaries(csvData string) []ProfileSummary {
+	rows := parseSimpleCSV(csvData)
+	var results []ProfileSummary
+	for _, row := range rows {
+		var posted, claimed, completed, stamps int
+		_, _ = fmt.Sscanf(row["posted"], "%d", &posted)
+		_, _ = fmt.Sscanf(row["claimed"], "%d", &claimed)
+		_, _ = fmt.Sscanf(row["completed"], "%d", &completed)
+		_, _ = fmt.Sscanf(row["stamps"], "%d", &stamps)
+		results = append(results, ProfileSummary{
+			Handle:    row["handle"],
+			Posted:    posted,
+			Claimed:   claimed,
+			Completed: completed,
+			Stamps:    stamps,
+		})
+	}
+	return results
+}

@@ -114,6 +114,20 @@ type ConfigResponse struct {
 	Upstreams []UpstreamInfoJSON `json:"upstreams,omitempty"`
 }
 
+// ProfileSummaryJSON is the JSON representation of a profile listing entry.
+type ProfileSummaryJSON struct {
+	Handle    string `json:"handle"`
+	Posted    int    `json:"posted"`
+	Claimed   int    `json:"claimed"`
+	Completed int    `json:"completed"`
+	Stamps    int    `json:"stamps"`
+}
+
+// ProfilesResponse is the JSON response for GET /api/profiles.
+type ProfilesResponse struct {
+	Profiles []ProfileSummaryJSON `json:"profiles"`
+}
+
 // ErrorResponse is the JSON error envelope.
 type ErrorResponse struct {
 	Error string `json:"error"`
@@ -289,6 +303,20 @@ func toBrowseResponse(r *sdk.BrowseResult) *BrowseResponse {
 		items[i] = toSummaryJSON(s, r.PendingIDs[s.ID])
 	}
 	return &BrowseResponse{Items: items}
+}
+
+func toProfilesResponse(profiles []commons.ProfileSummary) *ProfilesResponse {
+	items := make([]ProfileSummaryJSON, len(profiles))
+	for i, p := range profiles {
+		items[i] = ProfileSummaryJSON{
+			Handle:    p.Handle,
+			Posted:    p.Posted,
+			Claimed:   p.Claimed,
+			Completed: p.Completed,
+			Stamps:    p.Stamps,
+		}
+	}
+	return &ProfilesResponse{Profiles: items}
 }
 
 func toDashboardResponse(d *commons.DashboardData) *DashboardResponse {

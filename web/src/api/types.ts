@@ -135,6 +135,18 @@ export interface ErrorResponse {
   error: string;
 }
 
+export interface ProfileSummary {
+  handle: string;
+  posted: number;
+  claimed: number;
+  completed: number;
+  stamps: number;
+}
+
+export interface ProfilesResponse {
+  profiles: ProfileSummary[];
+}
+
 export interface BrowseFilter {
   status?: string;
   type?: string;

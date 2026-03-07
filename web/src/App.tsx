@@ -4,6 +4,7 @@ import { ConnectPage } from "./components/ConnectPage";
 import { Dashboard } from "./components/Dashboard";
 import { DetailView } from "./components/DetailView";
 import { Layout } from "./components/Layout";
+import { ProfilesList } from "./components/ProfilesList";
 import { Settings } from "./components/Settings";
 import { WastelandProvider } from "./context/WastelandContext";
 
@@ -16,6 +17,7 @@ export function App() {
             <Route path="/" element={<BrowseList />} />
             <Route path="/wanted/:id" element={<DetailView />} />
             <Route path="/me" element={<Dashboard />} />
+            <Route path="/profiles" element={<ProfilesList />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/connect" element={<ConnectPage />} />
             <Route path="/join" element={<ConnectPage />} />
