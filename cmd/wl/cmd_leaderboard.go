@@ -73,7 +73,9 @@ func runLeaderboard(cmd *cobra.Command, stdout, _ io.Writer, limit int) error {
 		style.Column{Name: "DONE", Width: 6, Align: style.AlignRight},
 		style.Column{Name: "QUALITY", Width: 8, Align: style.AlignRight},
 		style.Column{Name: "RELIAB", Width: 8, Align: style.AlignRight},
-		style.Column{Name: "TOP SKILLS", Width: 30},
+		style.Column{Name: "LANGUAGES", Width: 18},
+		style.Column{Name: "DOMAINS", Width: 16},
+		style.Column{Name: "CAPABILITIES", Width: 16},
 	)
 
 	for i, e := range entries {
@@ -81,8 +83,10 @@ func runLeaderboard(cmd *cobra.Command, stdout, _ io.Writer, limit int) error {
 		done := fmt.Sprintf("%d", e.Completions)
 		quality := fmt.Sprintf("%.1f", e.AvgQuality)
 		reliab := fmt.Sprintf("%.1f", e.AvgReliab)
-		skills := strings.Join(e.TopSkills, ", ")
-		tbl.AddRow(rank, e.RigHandle, done, quality, reliab, skills)
+		langs := strings.Join(e.TopLanguages, ", ")
+		domains := strings.Join(e.TopDomains, ", ")
+		caps := strings.Join(e.TopCapabilities, ", ")
+		tbl.AddRow(rank, e.RigHandle, done, quality, reliab, langs, domains, caps)
 	}
 
 	fmt.Fprintf(stdout, "Leaderboard (%d rigs):\n\n", len(entries))

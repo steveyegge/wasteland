@@ -143,12 +143,18 @@ func TestQueryLeaderboard_WithSkills(t *testing.T) {
 	if len(entries) != 1 {
 		t.Fatalf("got %d entries, want 1", len(entries))
 	}
-	// "go" appears twice, "sql" and "testing" once each.
-	if len(entries[0].TopSkills) == 0 {
-		t.Fatal("expected skills, got none")
+	// "go" and "sql" are languages; "testing" is a capability.
+	if len(entries[0].TopLanguages) == 0 {
+		t.Fatal("expected languages, got none")
 	}
-	if entries[0].TopSkills[0] != "go" {
-		t.Errorf("top skill = %q, want 'go'", entries[0].TopSkills[0])
+	if entries[0].TopLanguages[0] != "go" {
+		t.Errorf("top language = %q, want 'go'", entries[0].TopLanguages[0])
+	}
+	if len(entries[0].TopCapabilities) == 0 {
+		t.Fatal("expected capabilities, got none")
+	}
+	if entries[0].TopCapabilities[0] != "testing" {
+		t.Errorf("top capability = %q, want 'testing'", entries[0].TopCapabilities[0])
 	}
 }
 
@@ -182,8 +188,9 @@ func TestQueryLeaderboard_MalformedSkillTags(t *testing.T) {
 	if len(entries) != 1 {
 		t.Fatalf("got %d entries, want 1", len(entries))
 	}
-	if len(entries[0].TopSkills) != 0 {
-		t.Errorf("expected no skills for malformed tags, got %v", entries[0].TopSkills)
+	if len(entries[0].TopLanguages) != 0 || len(entries[0].TopDomains) != 0 || len(entries[0].TopCapabilities) != 0 {
+		t.Errorf("expected no skills for malformed tags, got langs=%v domains=%v caps=%v",
+			entries[0].TopLanguages, entries[0].TopDomains, entries[0].TopCapabilities)
 	}
 }
 
