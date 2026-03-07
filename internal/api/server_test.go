@@ -608,11 +608,12 @@ func TestLeaderboard(t *testing.T) {
 	if resp.Entries[0].Completions != 5 {
 		t.Errorf("alice completions = %d, want 5", resp.Entries[0].Completions)
 	}
-	if len(resp.Entries[0].TopSkills) != 2 {
-		t.Errorf("alice top_skills count = %d, want 2", len(resp.Entries[0].TopSkills))
+	// "go" and "sql" are languages; "testing" is a capability.
+	if len(resp.Entries[0].TopLanguages) != 2 {
+		t.Errorf("alice top_languages count = %d, want 2", len(resp.Entries[0].TopLanguages))
 	}
-	if len(resp.Entries[1].TopSkills) != 1 {
-		t.Errorf("bob top_skills count = %d, want 1", len(resp.Entries[1].TopSkills))
+	if len(resp.Entries[1].TopCapabilities) != 1 {
+		t.Errorf("bob top_capabilities count = %d, want 1", len(resp.Entries[1].TopCapabilities))
 	}
 }
 

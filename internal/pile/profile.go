@@ -230,20 +230,9 @@ func parseSheetJSON(raw string, profile *Profile) error {
 	return nil
 }
 
-// parseStamps categorizes stamps into languages, domains, and capabilities.
+// parseStamps categorizes stamps into languages, domains, and capabilities
+// using the shared taxonomy from commons.ClassifySkill.
 func parseStamps(rows []map[string]any, profile *Profile) {
-	// Known programming languages for classification
-	langSet := map[string]bool{
-		"c": true, "c++": true, "go": true, "rust": true, "python": true,
-		"javascript": true, "typescript": true, "java": true, "ruby": true,
-		"shell": true, "assembly": true, "makefile": true, "openscad": true,
-		"kotlin": true, "swift": true, "scala": true, "haskell": true,
-		"perl": true, "php": true, "lua": true, "r": true, "dart": true,
-		"elixir": true, "erlang": true, "clojure": true, "zig": true,
-		"nim": true, "ocaml": true, "f#": true, "c#": true, "html": true,
-		"css": true, "sql": true, "matlab": true, "julia": true,
-	}
-
 	for _, row := range rows {
 		var tags []string
 		tagsRaw := toString(row["skill_tags"])
@@ -283,34 +272,15 @@ func parseStamps(rows []map[string]any, profile *Profile) {
 			Message:     msg,
 		}
 
-		// Classify: language, domain, or capability stamp.
-		switch {
-		case langSet[strings.ToLower(primaryTag)]:
+		switch commons.ClassifySkill(primaryTag) {
+		case commons.SkillLanguage:
 			profile.Languages = append(profile.Languages, entry)
-		case isDomainTag(primaryTag):
+		case commons.SkillDomain:
 			profile.Domains = append(profile.Domains, entry)
 		default:
 			profile.Capabilities = append(profile.Capabilities, entry)
 		}
 	}
-}
-
-func isDomainTag(tag string) bool {
-	domainPrefixes := []string{
-		"operating-systems", "systems-programming", "audio-processing",
-		"text-processing", "hardware-design", "web-development",
-		"machine-learning", "data-engineering", "mobile-development",
-		"devops", "security", "database", "networking", "cloud",
-		"frontend", "backend", "fullstack", "game-development",
-		"embedded", "blockchain", "ai", "ml", "infrastructure",
-	}
-	lower := strings.ToLower(tag)
-	for _, prefix := range domainPrefixes {
-		if lower == prefix || strings.HasPrefix(lower, prefix) {
-			return true
-		}
-	}
-	return false
 }
 
 func toString(v any) string {

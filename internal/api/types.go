@@ -117,11 +117,13 @@ type ConfigResponse struct {
 
 // LeaderboardEntryJSON is the JSON representation of a leaderboard entry.
 type LeaderboardEntryJSON struct {
-	RigHandle   string   `json:"rig_handle"`
-	Completions int      `json:"completions"`
-	AvgQuality  float64  `json:"avg_quality"`
-	AvgReliab   float64  `json:"avg_reliability"`
-	TopSkills   []string `json:"top_skills,omitempty"`
+	RigHandle       string   `json:"rig_handle"`
+	Completions     int      `json:"completions"`
+	AvgQuality      float64  `json:"avg_quality"`
+	AvgReliab       float64  `json:"avg_reliability"`
+	TopLanguages    []string `json:"top_languages,omitempty"`
+	TopDomains      []string `json:"top_domains,omitempty"`
+	TopCapabilities []string `json:"top_capabilities,omitempty"`
 }
 
 // LeaderboardResponse is the JSON response for GET /api/leaderboard.
@@ -311,11 +313,13 @@ func toLeaderboardResponse(entries []commons.LeaderboardEntry) *LeaderboardRespo
 	items := make([]LeaderboardEntryJSON, len(entries))
 	for i, e := range entries {
 		items[i] = LeaderboardEntryJSON{
-			RigHandle:   e.RigHandle,
-			Completions: e.Completions,
-			AvgQuality:  e.AvgQuality,
-			AvgReliab:   e.AvgReliab,
-			TopSkills:   e.TopSkills,
+			RigHandle:       e.RigHandle,
+			Completions:     e.Completions,
+			AvgQuality:      e.AvgQuality,
+			AvgReliab:       e.AvgReliab,
+			TopLanguages:    e.TopLanguages,
+			TopDomains:      e.TopDomains,
+			TopCapabilities: e.TopCapabilities,
 		}
 	}
 	return &LeaderboardResponse{Entries: items}

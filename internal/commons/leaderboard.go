@@ -12,11 +12,13 @@ const maxLeaderboardLimit = 100
 
 // LeaderboardEntry holds aggregated stats for one rig on the leaderboard.
 type LeaderboardEntry struct {
-	RigHandle   string
-	Completions int
-	AvgQuality  float64
-	AvgReliab   float64
-	TopSkills   []string // up to 5 most frequent skill tags
+	RigHandle       string
+	Completions     int
+	AvgQuality      float64
+	AvgReliab       float64
+	TopLanguages    []string // up to 3 most frequent language tags
+	TopDomains      []string // up to 2 most frequent domain tags
+	TopCapabilities []string // up to 2 most frequent capability tags
 }
 
 // QueryLeaderboard aggregates completions and stamps into a ranked leaderboard.
@@ -113,9 +115,15 @@ ORDER BY c.completed_by`,
 
 	rows := parseSimpleCSV(output)
 
-	// Count tag frequency per rig. Use parseTagsJSON which skips malformed
-	// entries — a single bad row should not break the entire leaderboard.
-	perRig := make(map[string]map[string]int)
+	// Count tag frequency per rig per category. Use parseTagsJSON which
+	// skips malformed entries — a single bad row should not break the
+	// entire leaderboard. Tags are classified using the shared taxonomy.
+	type rigSkills struct {
+		languages    map[string]int
+		domains      map[string]int
+		capabilities map[string]int
+	}
+	perRig := make(map[string]*rigSkills)
 	for _, row := range rows {
 		rig := row["completed_by"]
 		tags := parseTagsJSON(row["skill_tags"])
@@ -123,15 +131,33 @@ ORDER BY c.completed_by`,
 			continue
 		}
 		if perRig[rig] == nil {
-			perRig[rig] = make(map[string]int)
+			perRig[rig] = &rigSkills{
+				languages:    make(map[string]int),
+				domains:      make(map[string]int),
+				capabilities: make(map[string]int),
+			}
 		}
 		for _, tag := range tags {
-			perRig[rig][strings.ToLower(tag)]++
+			lower := strings.ToLower(tag)
+			switch ClassifySkill(lower) {
+			case SkillLanguage:
+				perRig[rig].languages[lower]++
+			case SkillDomain:
+				perRig[rig].domains[lower]++
+			default:
+				perRig[rig].capabilities[lower]++
+			}
 		}
 	}
 
 	for i := range entries {
-		entries[i].TopSkills = topNKeys(perRig[entries[i].RigHandle], 5)
+		rs := perRig[entries[i].RigHandle]
+		if rs == nil {
+			continue
+		}
+		entries[i].TopLanguages = topNKeys(rs.languages, 3)
+		entries[i].TopDomains = topNKeys(rs.domains, 2)
+		entries[i].TopCapabilities = topNKeys(rs.capabilities, 2)
 	}
 	return nil
 }
