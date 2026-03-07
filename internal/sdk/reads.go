@@ -147,3 +147,8 @@ func (c *Client) computeBranchActions(r *DetailResult) []string {
 func (c *Client) Dashboard() (*commons.DashboardData, error) {
 	return commons.QueryMyDashboardBranchAware(c.db, c.mode, c.rigHandle)
 }
+
+// Profiles returns a list of rig handles with activity stats.
+func (c *Client) Profiles() ([]commons.ProfileSummary, error) {
+	return commons.QueryProfiles(c.db)
+}

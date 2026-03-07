@@ -61,6 +61,19 @@ func (s *Server) handleDashboard(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, toDashboardResponse(data))
 }
 
+func (s *Server) handleProfiles(w http.ResponseWriter, r *http.Request) {
+	client, ok := s.resolveClient(w, r)
+	if !ok {
+		return
+	}
+	profiles, err := client.Profiles()
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, toProfilesResponse(profiles))
+}
+
 func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
 	client, ok := s.resolveClient(w, r)
 	if !ok {

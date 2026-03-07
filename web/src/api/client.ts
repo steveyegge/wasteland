@@ -11,6 +11,7 @@ import type {
   JoinInput,
   MutationResponse,
   PostInput,
+  ProfilesResponse,
   SettingsInput,
   UpdateInput,
 } from "./types";
@@ -104,6 +105,10 @@ export async function dashboard(): Promise<DashboardResponse> {
 
 export async function config(): Promise<ConfigResponse> {
   return request<ConfigResponse>("/api/config");
+}
+
+export async function profiles(): Promise<ProfilesResponse> {
+  return request<ProfilesResponse>("/api/profiles");
 }
 
 export async function claim(id: string): Promise<MutationResponse> {
