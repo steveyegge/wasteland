@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { BrowseList } from "./components/BrowseList";
 import { ConnectPage } from "./components/ConnectPage";
 import { Dashboard } from "./components/Dashboard";
@@ -19,6 +19,7 @@ export function App() {
             <Route path="/settings" element={<Settings />} />
             <Route path="/connect" element={<ConnectPage />} />
             <Route path="/join" element={<ConnectPage />} />
+            <Route path="/wasteland" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
       </BrowserRouter>
